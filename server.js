@@ -1,8 +1,15 @@
-var express = require('express');
-var app = express();
+var express = require("express"),
+	app     = express(),
+	basicAuth = require('basic-auth-connect');
+
+app.set('view engine', 'ejs'); 
+app.use(basicAuth(function(user, pass, callback) {
+	var result = (user === 'testUser' && pass === 'testPass');
+	callback(null /* error */, {user: user, pass: pass});
+}));
 
 app.get("/", function(req, res) {
-	res.send("Main page");
+	res.render("index");
 })
 
 app.get("*", function(req, res) {
