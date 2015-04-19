@@ -51,13 +51,22 @@ app.get("/", function(req, res) {
 
 app.post("/print", function(req, res) {
 	if (req.busboy) {
+		destination = 
 		req.busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
-			console.log('Received ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype);
-			var saveTo = path.join(os.tmpDir(), path.basename(uuid.v4()) + path.extname(filename));
-			console.log("Saving to", saveTo);
-    		file.pipe(fs.createWriteStream(saveTo));
-			file.on('end', function() {
-				console.log('File [' + fieldname + '] Finished');
+			setup.attemptUpload({
+				username: req.session.username,
+				filesize: file.length,
+				filename: filename,
+				mimetype: mimetype,
+				req: req,
+				res: res
+			}, function(errMsg) {
+				if (errMsg) {
+					res.end(errMsg);
+				} else {
+					console.log("Saving to", destination);
+    				file.pipe(fs.createWriteStream(destination));
+				}
 			});
 		});
 		req.busboy.on("finish", function() {
