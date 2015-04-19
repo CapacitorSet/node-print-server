@@ -6,5 +6,5 @@ module.exports = {
 	authenticate: function(username, password) {
 		return (username == "admin" && password == "admin");
 	},
-	uploadFileSizeLimit: 5*1024*1024
+	uploadSizeLimit: 5*1024*1024
 }

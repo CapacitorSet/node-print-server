@@ -45,7 +45,8 @@ app.use(function(req, res, next) {
 });
 
 app.get("/", function(req, res) {
-	res.render("index");
+	// Should make the size human-readable
+	res.render("index", { maxSize: setup.uploadSizeLimit + " bytes" });
 });
 
 app.post("/print", function(req, res) {

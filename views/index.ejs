@@ -13,6 +13,7 @@
 	<form method="post" action="/print" enctype="multipart/form-data">
 		<label>Upload a file to print:</label><br>
 		<input type="file" name="file" /><br>
+		<em>Maximum file size: <%- maxSize %></em><br>
 		<input type="submit" />
 	</form>
 </body>
