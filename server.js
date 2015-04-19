@@ -1,27 +1,35 @@
 var express = require("express"),
 	app     = express(),
 	auth    = require("basic-auth"),
-	session = require("express-session");
+	session = require("express-session"),
+	setup   = require("./setup.js");
  
-app.set('view engine', 'ejs'); 
+var cookie_secret = Math.random();
+
+app.set('view engine', 'ejs');
+
 app.use(function(req, res, next) {
 	var credentials = auth(req);
-	// If no credentials were provided, reject the request (this is needed for first-time hits).
-	if (!credentials) {
+	
+	/* If no credentials were provided, reject the request (this is needed for first-time hits).
+	 * If the external auth method reports false, reject the request.
+	 */
+	if (!credentials || setup.authenticate(credentials.name, credentials.pass) == false) {
 		res.writeHead(401, {
 			'WWW-Authenticate': 'Basic realm="Node.js printing server"'
 		})
 	    res.end("Authentication failed! Please refresh the page and enter your data.");
 	    next("Authentication failed!");
+	} else {
+		// Else, log in.
+		next();
 	}
-	// Else, continue processing the request, no matter what credentials were sent.
-	next();
 });
 
 app.use(session({
 	resave: false,
 	saveUninitialized: false,
-	secret: "Insert secret here"
+	secret: cookie_secret,
 }));
 
 app.get("/", function(req, res) {
