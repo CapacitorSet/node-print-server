@@ -1,12 +1,17 @@
 var express = require("express"),
 	app     = express(),
+	uuid    = require("uuid"),
 	auth    = require("basic-auth"),
 	session = require("express-session"),
 	setup   = require("./setup.js");
  
-var cookie_secret = Math.random();
-
 app.set('view engine', 'ejs');
+
+app.use(session({
+	resave: false,
+	saveUninitialized: false,
+	secret: uuid.v4(),
+}));
 
 app.use(function(req, res, next) {
 	var credentials = auth(req);
@@ -21,16 +26,11 @@ app.use(function(req, res, next) {
 	    res.end("Authentication failed! Please refresh the page and enter your data.");
 	    next("Authentication failed!");
 	} else {
-		// Else, log in.
+		// Else, log in and store username.
+		req.session.username = credentials.name;
 		next();
 	}
 });
-
-app.use(session({
-	resave: false,
-	saveUninitialized: false,
-	secret: cookie_secret,
-}));
 
 app.get("/", function(req, res) {
 	res.render("index");
