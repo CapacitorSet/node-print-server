@@ -7,6 +7,7 @@ busboy  = require("connect-busboy"),
 path    = require("path"),
 os      = require("os"),
 fs      = require("fs"),
+printer = require("printer"),
 setup   = require("./setup.js");
 
 app.set('view engine', 'ejs');
@@ -51,8 +52,9 @@ app.get("/", function(req, res) {
 
 app.post("/print", function(req, res) {
 	if (req.busboy) {
-		destination = 
+ 		destination = null;
 		req.busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
+			destination = path.join(os.tmpDir(), path.basename(uuid.v4()) + path.extname(filename));
 			setup.attemptUpload({
 				username: req.session.username,
 				filesize: file.length,
@@ -70,7 +72,13 @@ app.post("/print", function(req, res) {
 			});
 		});
 		req.busboy.on("finish", function() {
-			res.end("File received!");
+			res.end("File received! Printing now to " + printer.getPrinters()[0].name + ".");
+			if (destination != null) {
+				// I know this is ugly, but node won't let me print normally for whatever reason
+				require('child_process').exec('node print.js "' + destination + '"', function() {
+					console.log("done!");
+				});
+			}
 		});
 		req.pipe(req.busboy);
 	} else {
